@@ -1,59 +1,47 @@
 #!/usr/bin/python3
-"""
-Script that reads stdin line by line and computes metrics:
-- Input format: <IP Address> - [<date>] "GET /projects/260 HTTP/1.1" <status
-                code> <file size>
-- After every 10 lines and/or a keyboard interruption (CTRL + C), print these
-    statistics from the beginning:
-Example:
-    File size: 5213
-    200: 2
-    401: 1
-    403: 2
-    404: 1
-    405: 1
-    500: 3
-"""
-import sys
-stcd = {"200": 0, "301": 0, "400": 0, "401": 0,
-        "403": 0, "404": 0, "405": 0, "500": 0}
-summ = 0
+""" script that reads stdin line by line and computes metrics """
 
+if __name__ == '__main__':
 
-def prn_stats():
-    """
-    Function that print stats about log
-    """
-    global summ
+    import sys
 
-    print('File size: {}'.format(summ))
-    stcdor = sorted(stcd.keys())
-    for each in stcdor:
-        if stcd[each] > 0:
-            print('{}: {}'.format(each, stcd[each]))
+    def print_results(statusCodes, fileSize):
+        """ Print statistics """
+        print("File size: {:d}".format(fileSize))
+        for statusCode, times in sorted(statusCodes.items()):
+            if times:
+                print("{:s}: {:d}".format(statusCode, times))
 
+    statusCodes = {"200": 0,
+                   "301": 0,
+                   "400": 0,
+                   "401": 0,
+                   "403": 0,
+                   "404": 0,
+                   "405": 0,
+                   "500": 0
+                   }
+    fileSize = 0
+    n_lines = 0
 
-if __name__ == "__main__":
-    cnt = 0
     try:
-        """ Iter the standar input """
-        for data in sys.stdin:
+        """ Read stdin line by line """
+        for line in sys.stdin:
+            if n_lines != 0 and n_lines % 10 == 0:
+                """ After every 10 lines, print from the beginning """
+                print_results(statusCodes, fileSize)
+            n_lines += 1
+            data = line.split()
             try:
-                fact = data.split(' ')
-                """ If there is a status code """
-                if fact[-2] in stcd:
-                    stcd[fact[-2]] += 1
-                """ If there is a lenght """
-                summ += int(fact[-1])
+                """ Compute metrics """
+                statusCode = data[-2]
+                if statusCode in statusCodes:
+                    statusCodes[statusCode] += 1
+                fileSize += int(data[-1])
             except:
                 pass
-            """ Printing control """
-            cnt += 1
-            if cnt == 10:
-                prn_stats()
-                cnt = 0
+        print_results(statusCodes, fileSize)
     except KeyboardInterrupt:
-        prn_stats()
+        """ Keyboard interruption, print from the beginning """
+        print_results(statusCodes, fileSize)
         raise
-    else:
-        prn_stats()
