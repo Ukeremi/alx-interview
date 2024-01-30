@@ -1,12 +1,13 @@
 #!/usr/bin/python3
-""" making changes """
+""" Making changes """
+
 
 def makeChange(coins, total):
     """ Generate changes needed to reach total
 
-    Args
-        coins ([List]): [List of coins available]
-        total ([int]: [Total amount needed]
+    Args:
+        coins ([List]): [List of Coins available]
+        total ([int]): [total amount needed]
     """
     if total <= 0:
         return 0
@@ -15,7 +16,7 @@ def makeChange(coins, total):
     coins.sort(reverse=True)
     for i in coins:
         while check < total:
-            check += 1
+            check += i
             temp += 1
         if check == total:
             return temp
